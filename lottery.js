@@ -63,7 +63,7 @@ function changeValue(specialProb = 0.1, myCode) {
 // 抽取中奖号码，并设置中奖概率
 function generateWinningNumber(myCode, winningProb = 0.5, prizeList) {
   console.log(winningProb);
-  probability = winningProb * 100;
+  let probability = winningProb * 100;
   // 生成0-99的随机整数，如果小于概率数则从我的号码中随机选取中奖号码，否则随机选取不在我的号码中的号码
   const randomNum = Math.floor(Math.random() * 100);
   if (randomNum < probability) {
