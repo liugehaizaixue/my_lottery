@@ -41,7 +41,7 @@ function initMyCode() {
 }
 
 myCode = initMyCode();
-
+myCode[0][0] = "10";
 // 抽取中奖号码，并设置中奖概率
 function generateWinningNumber(myCode, probability = 0.5) {
   probability = probability * 100;
@@ -66,10 +66,11 @@ winningNumber = generateWinningNumber(myCode, 0.5);
 // 计算中奖金额
 function calculatePrize(myCode, winningNumber, prizeList) {
   let totalPrize = 0;
-  const prizeArr = []; // 新建一个数组用于记录中奖金额
+  const prizeArr = []; // 用于记录中奖金额
 
   for (let i = 0; i < myCode.length; i++) {
-    if (myCode[i].includes(winningNumber)) {
+    if (myCode[i].includes(winningNumber) || myCode[i].includes("10")) {
+      // 如果中奖号码或10在该行中出现，则认为该行也中奖
       totalPrize += prizeList[i].prize;
       prizeArr.push(prizeList[i].prize); // 将中奖金额记录到 prizeArr 数组中
       if (prizeList[i].count.indexOf(winningNumber) === -1) {
@@ -84,6 +85,7 @@ function calculatePrize(myCode, winningNumber, prizeList) {
 }
 
 let calculateRes = calculatePrize(myCode, winningNumber, prizeList);
+
 // 合并数组
 
 console.log("中奖号码：" + winningNumber);
