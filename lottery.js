@@ -1,23 +1,28 @@
 function initPrizeList() {
   // 设置奖金
-  const prizeList = [
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-    { count: [], prize: null },
-  ];
-  const prizeArray = [5, 10, 20, 40, 60, 70, 80, 100, 200];
+  const probMap = {
+    //奖金及概率
+    5: 0.8,
+    10: 0.75,
+    20: 0.7,
+    40: 0.5,
+    60: 0.4,
+    70: 0.3,
+    80: 0.05,
+    100: 0.04,
+    200: 0.01,
+  };
+  const prizeArray = Object.keys(probMap).map(Number);
+  const prizeList = Array.from({ length: 10 }, () => ({
+    prob: 0,
+    prize: null,
+  }));
   for (let i = 0; i < prizeList.length; i++) {
     prizeList[i].prize =
       prizeArray[Math.floor(Math.random() * prizeArray.length)];
+    prizeList[i].prob = probMap[prizeList[i].prize];
   }
-
+  // console.log(prizeList);
   return prizeList;
 }
 
@@ -43,9 +48,9 @@ function initMyCode() {
 }
 
 // 专门在mycode中设置添加“10”的情况，提高中奖概率
-function changeValue(probability, myCode) {
+function changeValue(specialProb = 0.1, myCode) {
   const randomNum = Math.random(); // 生成0-1的随机数
-  if (randomNum <= probability) {
+  if (randomNum <= specialProb) {
     // 判断是否满足概率
     const rowIndex = Math.floor(Math.random() * myCode.length); // 随机获取行的索引
     const colIndex = Math.floor(Math.random() * myCode[rowIndex].length); // 随机获取列的索引
@@ -56,17 +61,31 @@ function changeValue(probability, myCode) {
 }
 
 // 抽取中奖号码，并设置中奖概率
-function generateWinningNumber(myCode, probability = 0.5) {
-  console.log(probability);
-  probability = probability * 100;
+function generateWinningNumber(myCode, winningProb = 0.5) {
+  console.log(winningProb);
+  probability = winningProb * 100;
   // 生成0-99的随机整数，如果小于概率数则从我的号码中随机选取中奖号码，否则随机选取不在我的号码中的号码
   const randomNum = Math.floor(Math.random() * 100);
   if (randomNum < probability) {
-    console.log("小于概率数则从我的号码中随机选取中奖号码");
-    const randomSubArr = myCode[Math.floor(Math.random() * myCode.length)];
-    return randomSubArr[Math.floor(Math.random() * randomSubArr.length)];
+    console.log("中奖，小于概率数则从我的号码中随机选取中奖号码");
+    let winningSubArr;
+    const prizeListSorted = prizeList.sort((a, b) => b.prize - a.prize); // 按奖金从大到小排序
+    const randomPrizeProb = Math.random(); // 生成0-1的随机数
+    console.log(prizeListSorted);
+    console.log(randomPrizeProb); //用该值和prizeList中设置的prob相比，选择最大的
+    for (let i = 0; i < prizeListSorted.length; i++) {
+      if (randomPrizeProb <= prizeListSorted[i].prob) {
+        // 按概率选取奖金
+        winningSubArr = myCode[i];
+        console.log("中奖子数组：", winningSubArr);
+        break;
+      } else {
+        winningSubArr = myCode[myCode.length - 1 - 1];
+      }
+    }
+    return winningSubArr[Math.floor(Math.random() * winningSubArr.length)];
   } else {
-    console.log("则随机选取不在我的号码中的号码");
+    console.log("未中奖,随机选取不在我的号码中的号码");
     let allNums = [];
     for (let i = 0; i < 100; i++) {
       allNums.push(i < 10 ? "0" + i : String(i));
@@ -87,9 +106,6 @@ function calculatePrize(myCode, winningNumber, prizeList) {
       // 如果中奖号码或10在该行中出现，则认为该行也中奖
       totalPrize += prizeList[i].prize;
       prizeArr.push(prizeList[i].prize); // 将中奖金额记录到 prizeArr 数组中
-      if (prizeList[i].count.indexOf(winningNumber) === -1) {
-        prizeList[i].count.push(winningNumber);
-      }
     } else {
       prizeArr.push(0); // 没中奖的情况下，将中奖金额设置为 0，并记录到 prizeArr 数组中
     }
@@ -102,18 +118,18 @@ function calculatePrize(myCode, winningNumber, prizeList) {
 function mergeArray(myCode, prizeList, winningNumber) {
   const mergedArr = myCode.map((subArr, index) => {
     const prize = prizeList[index].prize;
-    return subArr.concat(prize.toString());
+    return subArr.concat("￥" + prize.toString());
   });
 
   mergedArr.push([winningNumber]);
   return mergedArr;
 }
 
-function lottery() {
+function lottery(specialProb = 0.01, winningProb = 0.3) {
   prizeList = initPrizeList();
   myCode = initMyCode();
-  myCode = changeValue(0.01, myCode);
-  winningNumber = generateWinningNumber(myCode, 0.51);
+  myCode = changeValue(specialProb, myCode);
+  winningNumber = generateWinningNumber(myCode, winningProb, prizeList);
   let calculateRes = calculatePrize(myCode, winningNumber, prizeList);
   let mergedArr = mergeArray(myCode, prizeList, winningNumber);
 
