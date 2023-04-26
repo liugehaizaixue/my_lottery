@@ -36,15 +36,39 @@ function initMyCode() {
     for (var j = 0; j < num; j++) {
       // 判断生成的随机数是否是10，如果是，则继续生成随机数，直到不是10为止
       var randomNum = Math.floor(Math.random() * 100);
-      while (randomNum === 10) {
+      var str_randomNum = randomNum < 10 ? "0" + randomNum : String(randomNum); // 如果是一位数，则在前面加0，返回字符串类型
+      while (
+        str_randomNum === "10" || //等于10
+        subArr.indexOf(str_randomNum) !== -1 || //已经在该组号码存在
+        isNumberInArray(str_randomNum, my_code_arr) //在其他组存在
+      ) {
+        // console.log(
+        //   "重新生成",
+        //   str_randomNum,
+        //   str_randomNum.indexOf(randomNum),
+        //   isNumberInArray(str_randomNum, my_code_arr)
+        // );
         randomNum = Math.floor(Math.random() * 100);
+        str_randomNum = randomNum < 10 ? "0" + randomNum : String(randomNum);
       }
-      subArr.push(randomNum < 10 ? "0" + randomNum : String(randomNum)); // 如果是一位数，则在前面加0，返回字符串类型
+      subArr.push(str_randomNum);
     }
     my_code_arr.push(subArr);
     num--;
   }
   return my_code_arr;
+
+  //判断生成的随机数是否存在过
+  function isNumberInArray(num, arr) {
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr[i].length; j++) {
+        if (arr[i][j] === num) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 // 专门在mycode中设置添加“10”的情况，提高中奖概率
